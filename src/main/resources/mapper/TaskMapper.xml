@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.TaskMapper">
+
+    <resultMap id="TaskMap" type="top.turingteam.budstudent.pojo.entity.Task">
+        <id property="id" column="id"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="schoolCode" column="school_code"/>
+        <result property="taskSubId" column="task_sub_id"/>
+        <result property="taskType" column="type"/>
+        <result property="topic" column="topic"/>
+        <result property="description" column="description"/>
+        <result property="objId" column="obj_id"/>
+        <result property="answer" column="answer"/>
+        <result property="location" column="location" typeHandler="top.turingteam.budstudent.middleware.handler.LocationPointTypeHandler"/>
+        <result property="radius" column="radius"/>
+        <result property="pointAward" column="award"/>
+        <result property="parentTaskId" column="parent_task_id"/>
+        <result property="preTaskId" column="pre_task_id"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <resultMap id="LowTaskCompleteRateStudentVoMap" type="top.turingteam.budstudent.pojo.vo.LowTaskCompleteRateStudentVo">
+        <id property="id" column="student_id"/>
+        <result property="name" column="student_name"/>
+        <result property="collegeName" column="college_name"/>
+        <result property="majorName" column="major_name"/>
+        <result property="className" column="class_name"/>
+        <result property="completeCount" column="complete_count"/>
+        <result property="completeRate" column="completion_rate"/>
+    </resultMap>
+
+    <insert id="addTask">
+        INSERT INTO tb_task (creator_id, school_code, task_sub_id, type, topic, description, obj_id, answer, location, radius, award, parent_task_id, pre_task_id, start_time, end_time, create_time, update_time)
+        VALUES (#{creatorId}, #{schoolCode}, #{taskSubId}, #{taskType}, #{topic}, #{description}, #{objId}, #{answer}, #{location,typeHandler=top.turingteam.budstudent.middleware.handler.LocationPointTypeHandler}, #{radius}, #{pointAward}, #{parentTaskId}, #{preTaskId}, #{startTime}, #{endTime}, now(), now())
+    </insert>
+
+    <update id="updateTask">
+        UPDATE tb_task
+        SET creator_id     = #{creatorId},
+            school_code    = #{schoolCode},
+            task_sub_id    = #{taskSubId},
+            type           = #{taskType},
+            topic          = #{topic},
+            description    = #{description},
+            obj_id         = #{objId},
+            answer         = #{answer},
+            location       = #{location,typeHandler=top.turingteam.budstudent.middleware.handler.LocationPointTypeHandler},
+            radius         = #{radius},
+            award          = #{pointAward},
+            parent_task_id = #{parentTaskId},
+            pre_task_id    = #{preTaskId},
+            start_time     = #{startTime},
+            end_time       = #{endTime},
+            update_time    = now()
+        WHERE id = #{id}
+    </update>
+
+    <select id="getTaskMaxNumberBySchoolCode" resultType="java.lang.Integer">
+        SELECT MAX(task_sub_id) AS maxNumber
+        FROM tb_task
+        WHERE school_code = #{schoolCode}
+    </select>
+
+    <select id="getTaskByStudentIdAndSchoolCode" resultMap="TaskMap">
+        SELECT t1.id, creator_id, t1.school_code, task_sub_id, type, topic, description, obj_id, answer, t1.location, radius, award, parent_task_id, pre_task_id, start_time, end_time, create_time, update_time
+        FROM tb_task AS t1
+                 LEFT JOIN tb_task_complete AS t2 ON t1.id = t2.task_id AND t2.stu_id = #{id}
+        WHERE t1.school_code = #{schoolCode}
+          AND t1.start_time between #{date} and now()
+          AND t2.id IS NULL OR t2.status != 1
+    </select>
+
+    <select id="getAllTask" resultMap="TaskMap">
+        SELECT id, creator_id, school_code, task_sub_id, type, topic, description, obj_id, answer, location, radius, award, parent_task_id, pre_task_id, start_time, end_time, create_time, update_time
+        FROM tb_task
+        WHERE school_code = #{schoolCode}
+    </select>
+    <select id="getLowerCompleteRateStudentList" resultMap="LowTaskCompleteRateStudentVoMap">
+        SELECT
+            si.id AS student_id,
+            si.name AS student_name,
+            clg.name AS college_name,
+            mj.name AS major_name,
+            si.user_class AS class_name,
+            COUNT(tc.id) AS complete_count,
+            IFNULL(COUNT(tc.id) / COUNT(ti.id) * 100, 0) AS completion_rate
+        FROM
+            tb_stu_info AS si
+                LEFT JOIN
+            tb_task_complete AS tc ON si.id = tc.stu_id
+                LEFT JOIN
+            tb_task AS ti ON tc.task_id = ti.id
+                LEFT JOIN
+            tb_college AS clg ON si.school = clg.school_code AND si.college = clg.collage_code
+                LEFT JOIN
+            tb_major AS mj ON si.major = mj.major_code
+        WHERE
+            si.school = #{schoolCode}
+        GROUP BY
+            si.id, si.name, si.college, clg.name, si.major, mj.name
+        HAVING
+            completion_rate &lt; 30;
+    </select>
+
+    <select id="selectById" resultMap="TaskMap">
+        SELECT id, creator_id, school_code, task_sub_id, type, topic, description, obj_id, answer, location , radius, award, parent_task_id, pre_task_id, start_time, end_time, create_time, update_time
+        FROM tb_task
+        WHERE id = #{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.StudentPointMapper">  <!--为mapper接口的全类名-->
+
+    <resultMap id="StudentPointResultMap" type="top.turingteam.budstudent.pojo.vo.StudentPointVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="schoolName" property="schoolName"/>
+        <result column="point" property="point"/>
+    </resultMap>
+
+    <select id="selectSchoolRank" resultMap="StudentPointResultMap">
+        SELECT
+            s.id,
+            s.name,
+            sc.name AS schoolName,
+            p.points_total AS point
+        FROM
+            tb_stu_point p
+                JOIN
+            tb_stu_info s ON p.id_card = s.id_card
+                JOIN
+            tb_school sc ON p.school_code = sc.school_code
+        WHERE
+            p.school_code = #{schoolCode}
+        ORDER BY
+            p.points_total DESC
+        LIMIT 100;
+    </select>
+
+    <select id="selectTotalRank" resultMap="StudentPointResultMap">
+        SELECT
+            s.id,
+            s.name,
+            sc.name AS schoolName,
+            p.points_total AS point
+        FROM
+            tb_stu_point p
+                JOIN
+            tb_stu_info s ON p.id_card = s.id_card
+                JOIN
+            tb_school sc ON p.school_code = sc.school_code
+        ORDER BY
+            p.points_total DESC
+        LIMIT 100;
+    </select>
+</mapper>

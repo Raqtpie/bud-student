@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.UserGiftMapper">
+    <resultMap id="SchoolGiftResultMap" type="top.turingteam.budstudent.pojo.entity.UserGift">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="giftId" column="gift_id" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="exchangeTime" column="exchange_time" jdbcType="TIMESTAMP"/>
+        <result property="getTime" column="get_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <resultMap id="MyGiftResultMap" type="top.turingteam.budstudent.pojo.dto.GiftListDto">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="exchangeTime" column="exchange_time" jdbcType="TIMESTAMP"/>
+        <result property="getTime" column="get_time" jdbcType="TIMESTAMP"/>
+        <result property="giftId" column="gift_id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="photoUrl" column="photo_url" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--通过学生id，查询到自己的礼品兑换列表，礼品id再去查礼品的具体信息-->
+    <select id="selectUserGiftByUserId" resultMap="MyGiftResultMap">
+        SELECT ug.id,
+               ug.status,
+               ug.exchange_time,
+               ug.get_time,
+               g.id as gift_id,
+               g.name,
+               g.description,
+               g.photo_url
+        FROM turing.tb_user_gift ug
+                 JOIN turing.tb_gift g ON ug.gift_id = g.id
+        WHERE ug.user_id = #{userId};
+    </select>
+
+    <!--通过学校code，查询到学校的礼品列表-->
+    <select id="getUserGiftBySchoolCode" resultMap="SchoolGiftResultMap">
+        SELECT ug.*
+        FROM turing.tb_user_gift ug
+                 JOIN turing.tb_gift g ON ug.gift_id = g.id
+        WHERE g.school_code = #{schoolCode}
+    </select>
+
+    <!--某个礼品的兑换次数-->
+    <select id="exchangeGiftCount" resultType="Integer">
+        SELECT COUNT(1)
+        FROM turing.tb_user_gift
+        WHERE gift_id = #{giftId}
+    </select>
+</mapper>

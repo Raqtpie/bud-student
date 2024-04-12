@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.TaskCompleteRecordMapper">
+    <insert id="insertRecord">
+        INSERT INTO tb_task_complete (school_code, task_id, stu_id, img_url, location, complete_time, status)
+        VALUES (#{schoolCode}, #{taskId}, #{studentId}, #{imgUrl}, #{location, typeHandler=top.turingteam.budstudent.middleware.handler.LocationPointTypeHandler}, #{completeTime}, #{status})
+    </insert>
+    <update id="updateRecord">
+        UPDATE tb_task_complete
+        SET school_code = #{schoolCode},
+            task_id = #{taskId},
+            stu_id = #{studentId},
+            img_url = #{imgUrl},
+            location = #{location, typeHandler=top.turingteam.budstudent.middleware.handler.LocationPointTypeHandler},
+            complete_time = #{completeTime},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+    <select id="getCompleteCountBySchoolIdAndCollegeId" resultType="java.lang.Long">
+        SELECT COUNT(tc.id)
+        FROM tb_task_complete AS tc
+                 LEFT JOIN
+             tb_stu_info AS si ON tc.stu_id = si.id
+        WHERE si.school = #{schoolId}
+          AND si.college = #{collegeId}
+    </select>
+</mapper>

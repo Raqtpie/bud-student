@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.OnlineTaskMapper">
+
+    <resultMap id="OnlineTaskMap" type="top.turingteam.budstudent.pojo.entity.OnlineTask">
+        <id property="id" column="id"/>
+        <result property="schoolCode" column="school_code"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="topic" column="topic"/>
+        <result property="description" column="description"/>
+        <result property="objId" column="obj_id"/>
+        <result property="award" column="point_award"/>
+        <result property="date" column="date"/>
+    </resultMap>
+
+    <resultMap id="LowTaskCompleteRateStudentVoMap" type="top.turingteam.budstudent.pojo.vo.LowTaskCompleteRateStudentVo">
+        <id property="id" column="student_id"/>
+        <result property="name" column="student_name"/>
+        <result property="collegeName" column="college_name"/>
+        <result property="majorName" column="major_name"/>
+        <result property="className" column="class_name"/>
+        <result property="completeCount" column="complete_count"/>
+        <result property="completeRate" column="completion_rate"/>
+    </resultMap>
+
+    <select id="getOnlineTaskNotYetDone" resultMap="OnlineTaskMap">
+        SELECT *
+        FROM tb_task_online AS t1
+                 LEFT JOIN tb_task_complete AS t2 ON t1.id = t2.task_online_id AND t2.stu_id = #{studentId}
+        WHERE t1.school_code = #{schoolCode}
+          AND t1.date between #{date} and now()
+          AND t2.id IS NULL OR t2.status != 1;
+    </select>
+    <select id="getLowerCompleteRateStudentList" resultMap="LowTaskCompleteRateStudentVoMap">
+        SELECT
+            si.id AS student_id,
+            si.name AS student_name,
+            clg.name AS college_name,
+            mj.name AS major_name,
+            si.user_class AS class_name,
+            COUNT(tc.id) AS complete_count,
+            IFNULL(COUNT(tc.id) / COUNT(toi.id) * 100, 0) AS completion_rate
+        FROM
+            tb_stu_info AS si
+                LEFT JOIN
+            tb_task_complete AS tc ON si.id = tc.stu_id
+                LEFT JOIN
+            tb_task_online AS toi ON tc.task_online_id = toi.id
+                LEFT JOIN
+            tb_college AS clg ON si.school = clg.school_code AND si.college = clg.collage_code
+                LEFT JOIN
+            tb_major AS mj ON si.major = mj.major_code
+        WHERE
+            si.school = #{schoolCode}
+        GROUP BY
+            si.id, si.name, si.college, clg.name, si.major, mj.name
+        HAVING
+            completion_rate &lt; 30;
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.GiftMapper">
+
+    <resultMap id="BaseResultMap" type="top.turingteam.budstudent.pojo.entity.Gift">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+            <result property="maxExchange" column="max_exchange" jdbcType="INTEGER"/>
+            <result property="photoUrl" column="photo_url" jdbcType="VARCHAR"/>
+            <result property="point" column="point" jdbcType="INTEGER"/>
+            <result property="schoolCode" column="school_code" jdbcType="INTEGER"/>
+            <result property="createId" column="create_id" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+</mapper>

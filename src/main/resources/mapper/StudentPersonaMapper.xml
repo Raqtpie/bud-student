@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.StudentPersonaMapper">
+
+    <resultMap id="StudentPersonaMap" type="top.turingteam.budstudent.pojo.entity.StudentPersona">
+        <id property="id" column="persona_id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="url" column="url"/>
+        <result property="requirePoint" column="require_point"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap id="StudentPersonaGetVoMap" type="top.turingteam.budstudent.pojo.vo.StudentPersonaMsgVo">
+        <id property="id" column="persona_id"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="url" column="url"/>
+        <result property="requirePoint" column="require_point"/>
+        <result property="ownFlag" column="own_flag"/>
+        <result property="useFlag" column="use_flag"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insertStu2Persona">
+        INSERT INTO tb_stu2persona (student_id, persona_id)
+        VALUES (#{studentId}, #{personaId})
+    </insert>
+    <insert id="insertNowPersona">
+        INSERT INTO tb_stu_persona_now (student_id, persona_id)
+        VALUE (#{studentId}, #{personaId})
+    </insert>
+
+    <update id="setNowPersona">
+        UPDATE tb_stu_persona_now
+        SET persona_id = #{personaId}
+        WHERE student_id = #{studentId}
+    </update>
+
+    <select id="getStudentPersonaById" resultMap="StudentPersonaMap">
+        SELECT t1.persona_id, t2.name, t2.gender, t2.url, t2.require_point, t2.create_time, t2.update_time
+        FROM tb_stu_persona_now t1
+                 LEFT JOIN tb_stu_persona t2 ON t1.persona_id = t2.id
+        WHERE t1.student_id = #{studentId}
+    </select>
+
+    <select id="isOwned" resultType="java.lang.Boolean">
+        SELECT COUNT(1) > 0
+        FROM tb_stu2persona
+        WHERE student_id = #{studentId}
+          AND persona_id = #{personaId}
+    </select>
+
+    <select id="isUsed" resultType="java.lang.Boolean">
+        SELECT COUNT(1) > 0
+        FROM tb_stu_persona_now
+        WHERE student_id = #{studentId}
+          AND persona_id = #{personaId}
+    </select>
+
+    <select id="getAllByStudentId" resultMap="StudentPersonaGetVoMap">
+        SELECT sp.id AS persona_id,
+               sp.name,
+               sp.gender,
+               sp.url,
+               sp.require_point,
+               sp.create_time,
+               sp.update_time
+        FROM tb_stu_persona sp
+        WHERE sp.gender = #{gender}
+    </select>
+</mapper>

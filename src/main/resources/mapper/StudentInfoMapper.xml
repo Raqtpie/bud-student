@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.turingteam.budstudent.mapper.StudentInfoMapper">
+
+    <resultMap id="studentInfoMap" type="top.turingteam.budstudent.pojo.entity.StudentInfo">
+        <id property="id" column="id"/>
+        <result property="idCard" column="id_card"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="noticeNumber" column="notice_number"/>
+        <result property="examNumber" column="exam_number"/>
+        <result property="schoolCode" column="school"/>
+        <result property="collegeCode" column="college"/>
+        <result property="majorCode" column="major"/>
+        <result property="className" column="user_class"/>
+        <result property="signature" column="signature"/>
+        <result property="postalCode" column="postal_code"/>
+        <result property="address" column="home_address"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="photoUrl" column="real_photo_url"/>
+    </resultMap>
+
+    <select id="getActiveStudentCountByProvince" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT su.id) AS active_count
+        FROM tb_stu_user su
+                 INNER JOIN tb_stu_info si ON su.id = si.id
+        WHERE LEFT(si.postal_code, 2) = #{postalCode}
+          AND su.active_status = TRUE
+    </select>
+    <select id="getActiveStudentCountByProvinceAndSchoolCode" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT su.id) AS active_count
+        FROM tb_stu_user su
+                 INNER JOIN tb_stu_info si ON su.id = si.id
+        WHERE LEFT(si.postal_code, 2) = #{postalCode}
+          AND si.school = #{schoolCode}
+          AND su.active_status = TRUE
+    </select>
+    <select id="selectCountBySchoolId" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT su.id) AS active_count
+        FROM tb_stu_user su
+                 INNER JOIN tb_stu_info si ON su.id = si.id
+        WHERE si.school = #{schoolId}
+    </select>
+    <select id="selectActiveCountBySchoolId" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT su.id) AS active_count
+        FROM tb_stu_user su
+                 INNER JOIN tb_stu_info si ON su.id = si.id
+        WHERE si.school = #{schoolId}
+          AND su.active_status = TRUE
+    </select>
+    <select id="getList" resultMap="studentInfoMap">
+        SELECT id, id_card, name, gender, notice_number, exam_number, school, college, major, user_class, signature, postal_code, home_address, avatar_url, real_photo_url, create_at, update_at
+        FROM tb_stu_info
+        WHERE school = #{schoolCode}
+        LIMIT #{page}, #{size}
+    </select>
+</mapper>
